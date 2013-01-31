@@ -1,0 +1,14 @@
+#!/usr/bin/php
+<?php
+# run from root dir of website
+require_once( "lib/arc2/ARC2.php" );
+require_once( "lib/Graphite/Graphite.php" );
+
+$graph = new Graphite();
+$graph->load( "http://learning-provider.data.ac.uk/data/learning-providers-plus.ttl" );
+foreach( $graph->allOfType( "foaf:Organization" ) as $org )
+{
+	$wikipage = $org->get( "foaf:isPrimaryTopicOf" );
+	$wikipage->load();
+	print "$wikipage\n";
+}

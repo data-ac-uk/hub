@@ -1,0 +1,35 @@
+#!/usr/bin/php
+<?php
+# run from root dir of website
+require_once( "lib/arc2/ARC2.php" );
+require_once( "lib/Graphite/Graphite.php" );
+
+$graph = new Graphite();
+$graph->ns( "aiiso", "http://purl.org/vocab/aiiso/schema#" );
+print $graph->load( "http://learning-provider.data.ac.uk/data/learning-providers-plus.ttl" );
+foreach( $graph->allOfType( "aiiso:Institution" ) as $uni )
+{
+	print $uni->label()."\n";
+	$homepage = get_url( $uni->get( "foaf:homepage" ) );
+	$links = array();
+	preg_replace( "/<link([^>]+)>/e", '$links []= "$1";', $homepage );
+	foreach( $links as $link )
+	{
+		print "* $link\n";
+	}
+}
+
+
+function get_url($url) {
+	$process = curl_init($url);
+	$headers = array();
+	$headers[] = 'Accept: text/turtle, application/rdf+xml';
+	curl_setopt($process, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($process, CURLOPT_HEADER, 0);
+	curl_setopt($process, CURLOPT_TIMEOUT, 30);
+	curl_setopt($process, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($process, CURLOPT_FOLLOWLOCATION, 1);
+	$return = curl_exec($process);
+	curl_close($process);
+	return $return;
+}
