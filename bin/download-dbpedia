@@ -4,11 +4,17 @@
 require_once( "lib/arc2/ARC2.php" );
 require_once( "lib/Graphite/Graphite.php" );
 
+$outfile = "htdocs/data/hub-dbpedia.ttl";
+
 $graph = new Graphite();
+$graph_out = new Graphite();
 $graph->load( "http://learning-provider.data.ac.uk/data/learning-providers-plus.ttl" );
 foreach( $graph->allOfType( "foaf:Organization" ) as $org )
 {
 	$wikipage = $org->get( "foaf:isPrimaryTopicOf" );
-	$wikipage->load();
 	print "$wikipage\n";
+	$graph_out->load( $wikipage );
 }
+$fp = fopen($outfile, 'w');
+fwrite( $fp, $graph_out->serialize( "Turtle" ) );
+fclose( $fp );
